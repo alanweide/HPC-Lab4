@@ -83,13 +83,12 @@ int main(int argc, const char * argv[]) {
 	
 #ifdef CUDA
 	cudaCompute<<<dimGrid, dimBlock>>>(d_F);
-	
-	printf("past CUDA kernel\n");
 #else
 	computeStuff(F);
 #endif
 	
 	clock_t clock_duration = clock() - clock_start;
+	printf("Clock stopped\n");
 	
 #ifdef CUDA
 	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
