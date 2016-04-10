@@ -14,7 +14,10 @@
 #include <cuda.h>
 
 #define DIM 4097
+
+#ifndef REPS
 #define REPS 100
+#endif
 
 void initMatrix(double *F) {
 	for (int i = 0; i < DIM; i++) {
