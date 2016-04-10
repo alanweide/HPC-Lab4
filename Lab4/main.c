@@ -59,25 +59,21 @@ __global__ void cudaCompute(double* F) {
 			}
 		}
 	}
-	
-	if (tid == 0) {
-		printf("done with CUDA kernel\n");
-	}
 }
 
 int main(int argc, const char * argv[]) {
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(double);
 	double* F =(double*) malloc(memSize);
-	
+
 	initMatrix(F);
 	
 #ifdef CUDA
 	double* d_F;
 	cudaMalloc((void**) &d_F, memSize);
 	cudaMemcpy(d_F, F, memSize, cudaMemcpyHostToDevice);
-	int nBlocks = 4;
-	int tpb = 1024;
+	int nBlocks = 512;
+	int tpb = 256;
 	dim3 dimGrid(nBlocks);
 	dim3 dimBlock(tpb);
 #endif
@@ -86,12 +82,12 @@ int main(int argc, const char * argv[]) {
 	
 #ifdef CUDA
 	cudaCompute<<<dimGrid, dimBlock>>>(d_F);
+	cudaThreadSynchronize();
 #else
 	computeStuff(F);
 #endif
 	
 	clock_t clock_duration = clock() - clock_start;
-	printf("Clock stopped\n");
 	
 #ifdef CUDA
 	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
