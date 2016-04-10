@@ -1,5 +1,7 @@
 all: cuda serial
 
+remake: clean all
+
 cuda:
 	nvcc -O3 -D CUDA main.cu -o cuda
 
