@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E700CA9E1CBAE67B005BD323 /* libcuda.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E700CA9D1CBAE67B005BD323 /* libcuda.dylib */; };
+		E7A4E0D81CBB0F5D00AA983B /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = E7A4E0D71CBB0F5D00AA983B /* Makefile */; };
 		E7DB28AB1CB9A41D00A66BC5 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = E7DB28AA1CB9A41D00A66BC5 /* main.c */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		E700CA9D1CBAE67B005BD323 /* libcuda.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcuda.dylib; path = ../../../../../usr/local/cuda/lib/libcuda.dylib; sourceTree = "<group>"; };
+		E7A4E0D71CBB0F5D00AA983B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		E7DB28A71CB9A41D00A66BC5 /* Lab4 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lab4; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7DB28AA1CB9A41D00A66BC5 /* main.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -62,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				E7DB28AA1CB9A41D00A66BC5 /* main.c */,
+				E7A4E0D71CBB0F5D00AA983B /* Makefile */,
 			);
 			path = Lab4;
 			sourceTree = "<group>";
@@ -122,6 +125,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7A4E0D81CBB0F5D00AA983B /* Makefile in Sources */,
 				E7DB28AB1CB9A41D00A66BC5 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
