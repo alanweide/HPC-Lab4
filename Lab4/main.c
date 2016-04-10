@@ -72,8 +72,8 @@ int main(int argc, const char * argv[]) {
 	double* d_F;
 	cudaMalloc((void**) &d_F, memSize);
 	cudaMemcpy(d_F, F, memSize, cudaMemcpyHostToDevice);
-	int nBlocks = 30;
-	int tpb = 192;
+	int nBlocks = 512;
+	int tpb = 256;
 	dim3 dimGrid(nBlocks);
 	dim3 dimBlock(tpb);
 #endif
