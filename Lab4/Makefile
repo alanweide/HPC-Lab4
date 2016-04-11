@@ -1,4 +1,4 @@
-all: clean cuda1 serial1 cuda2 serial2 cuda2-print
+all: clean cuda1 serial1 cuda2 serial2 cuda2-print cuda3 serial3
 
 cuda1:
 	nvcc -O3 -D CUDA main.cu -o lab4p1
@@ -22,4 +22,4 @@ serial3:
 	nvcc -O3 main3.cu -o serial3
 
 clean:
-	rm -f cuda1 serial1 cuda2 serial2 cuda2p
+	rm -f cuda1 serial1 cuda2 serial2 cuda2p lab4p3 serial3
