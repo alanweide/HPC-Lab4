@@ -24,7 +24,7 @@
 void initMatrix(int *F) {
 	for (int i = 0; i < DIM; i++) {
 		for (int j = 0; j < DIM; j++) {
-			F[DIM * i + j] = (int)(1 + ((1000L * rand()) / RAND_MAX));
+			F[DIM * i + j] = DIM*i + j;//(int)(1 + ((1000L * rand()) / RAND_MAX));
 		}
 	}
 }
@@ -48,6 +48,18 @@ void computeStuff(int *F) {
 			F[DIM*i + j] = tmp;
 		}
 	}
+}
+
+void verifyTranspose(int *expected, int *actual) {
+	for (int i = 0; i < DIM; i++) {
+		for (int j = 0; j <= i; j++) {
+			if (expected[DIM*j + i] != actual[DIM*i + j]) {
+				printf("Failure: actual[%d][%d] expected %d, but found %d\n", i, j, expected[DIM*j + i], actual[DIM*i + j]);
+				return;
+			}
+		}
+	}
+	printf("Verified: Matrices are transposes of each other.\n");
 }
 
 #ifdef CUDA
@@ -82,22 +94,34 @@ int main(int argc, char* argv[]) {
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(int);
 	size_t thrArrSize = nblk * tpb * sizeof(int);
-	int* F = (int*) malloc(memSize);
+	int *F = (int*) malloc(memSize);
+	int *computedF = (int*) malloc(memSize);
 	
 	clock_t clock_start = clock();
 	
 	initMatrix(F);
-//	printMatrix(F);
-//	printf("\n");
-	
-	int spt = (DIM+1) * (DIM+1) / 2 / (nblk * tpb);
-//	printf("spt=%d\n", spt);
+
+	int spt = 1 + (DIM * DIM) / 2 / (nblk * tpb);
 	int *startI = (int*)malloc(thrArrSize);
 	int *startJ = (int*)malloc(thrArrSize);
+	
+	// Computes the start i and j coordinates for each thread.
+	
+	/* 
+	 * Thread division is based on the following indexing of the matrix:
+	 * [  -  -  -  -  -  ... ]
+	 * [  0  -  -  -  -  ... ]
+	 * [  1  2  -  -  -  ... ]
+	 * [  3  4  5  -  -  ... ]
+	 * [  6  7  8  9  -  ... ]
+	 * [ 10 11 12 13 14  ... ]
+	 * [ 15 16 17 18 19  ... ]
+	 * ...
+	 * Thread 0 gets cells [0, spt), thread 1 [spt, 2*spt), and so on
+	 */
 	for (int i = 0; i < nblk * tpb; i++) {
 		startI[i] = 1 + (((int)(sqrt(1 + 8 * i * spt)) - 1) / 2);
 		startJ[i] = (i * spt) - ((startI[i] + 0) * (startI[i] - 1) / 2);
-//		printf("t[%d] = (%d, %d)\n", i, startI[i], startJ[i]);
 	}
 	
 #ifdef CUDA
@@ -120,17 +144,17 @@ int main(int argc, char* argv[]) {
 	cuda_compute<<<dimGrid, dimBlock>>>(d_F, d_i, d_j, spt);
 	cudaThreadSynchronize();
 #else
+	// Serial
 	computeStuff(F);
 #endif
 	
 	clock_t total_duration = clock() - clock_start;
 	
 #ifdef CUDA
-	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
+	cudaMemcpy(computedF, d_F, memSize, cudaMemcpyDeviceToHost);
 #endif
 	
-//	printf("\n");
-//	printMatrix(F);
+	verifyTranspose(F, computedF);
 	
 	double time_in_seconds = (total_duration - init_duration) / 1000000.0;
 	

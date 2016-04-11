@@ -22,4 +22,4 @@ serial3:
 	nvcc -O3 main3.cu -o serial3
 
 clean:
-	rm -f cuda1 serial1 cuda2 serial2 cuda2p lab4p3 serial3
+	rm -f lab4p1 serial1 lab4p2 serial2 cuda2p lab4p3 serial3
