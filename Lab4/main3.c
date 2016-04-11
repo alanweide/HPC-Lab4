@@ -17,9 +17,9 @@
 #include <cuda_runtime.h>
 #endif
 
-#define DIM 10
+#define DIM 1024
 #define NBLK 1
-#define TPB 6
+#define TPB 32
 
 void initMatrix(int *F) {
 	for (int i = 0; i < DIM; i++) {
@@ -56,11 +56,11 @@ __global__ void cuda_compute(int *F, int *startI, int *startJ, int spt) {
 	int count = 0;
 	int tid = gridDim.x * blockIdx.x + threadIdx.x;
 	
-	for (int i = startI[tid]; i < DIM/2 && !thrDone; i++) {
+	for (int i = startI[tid]; i < DIM && !thrDone; i++) {
 		for (int j = startJ[tid]; j < i && !thrDone; j++) {
 			int tmp = F[DIM*j + i];
 			F[DIM*j + i] = F[DIM*i + j];
-			F[DIM*i + j] = //tmp;
+			F[DIM*i + j] = tmp;
 			count++;
 			thrDone = (count >= spt);
 		}
