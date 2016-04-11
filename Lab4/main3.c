@@ -40,19 +40,12 @@ void printMatrix (int *F) {
 	
 }
 
-void computeStuff(int *F, int *startI, int *startJ, int spt) {
-	int thrDone= 0;
-	int count = 0;
-	for (int tid = 0; tid < NBLK * TPB; tid++) {
-		printf("t[%d]=(%d, %d)\n", tid, startI[tid], startJ[tid]);
-		for (int i = startI[tid]; i <= startI[tid+1]; i++) {
-			for (int j = startJ[tid]; j < i; j++) {
-				int tmp = F[DIM*j + i];
-				F[DIM*j + i] = F[DIM*i + j];
-				F[DIM*i + j] = tmp;
-				count++;
-				thrDone = (count >= spt);
-			}
+void computeStuff(int *F) {
+	for (int i = 0; i < DIM; i++) {
+		for (int j = 0; j < i; j++) {
+			int tmp = F[DIM*j + i];
+			F[DIM*j + i] = F[DIM*i + j];
+			F[DIM*i + j] = tmp;
 		}
 	}
 }
@@ -118,7 +111,7 @@ int main(int argc, char* argv[]) {
 	cuda_compute<<<dimGrid, dimBlock>>>(d_F, d_i, d_j, spt);
 	cudaThreadSynchronize();
 #else
-	computeStuff(F, startI, startJ, spt);
+	computeStuff(F);
 #endif
 	
 	clock_t total_duration = clock() - clock_start;
