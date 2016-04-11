@@ -51,12 +51,10 @@ void computeStuff(double *F) {
 __global__ void cudaCompute(double* F) {
 	int bid = blockIdx.x;
 	int tid = threadIdx.x;
-
-	for (int k = 0; k < REPS; k++)  {
-		for (int i = bid + 1; i < DIM; i+=gridDim.x) {
-			for (int j = tid; j < DIM-1; j+=blockDim.x) {
-				F[DIM * i + j] = F[DIM * (i-1) + (j+1)] + F[DIM * i + (j+1)];
-			}
+	
+	for (int i = bid + 1; i < DIM; i+=gridDim.x) {
+		for (int j = tid; j < DIM-1; j+=blockDim.x) {
+			F[DIM * i + j] = F[DIM * (i-1) + (j+1)] + F[DIM * i + (j+1)];
 		}
 	}
 }
@@ -65,6 +63,8 @@ int main(int argc, const char * argv[]) {
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(double);
 	double* F =(double*) malloc(memSize);
+	
+	clock_t clock_start = clock();
 
 	initMatrix(F);
 	
@@ -78,23 +78,27 @@ int main(int argc, const char * argv[]) {
 	dim3 dimBlock(tpb);
 #endif
 	
-	clock_t clock_start = clock();
+	clock_t init_duration = clock() - clock_start;
 	
 #ifdef CUDA
-	cudaCompute<<<dimGrid, dimBlock>>>(d_F);
-	cudaThreadSynchronize();
+	for (int i = 0; i < REPS; i++) {
+		cudaCompute<<<dimGrid, dimBlock>>>(d_F);
+		cudaThreadSynchronize();
+	}
 #else
 	computeStuff(F);
 #endif
 	
-	clock_t clock_duration = clock() - clock_start;
+	clock_t total_duration = clock() - clock_start;
 	
 #ifdef CUDA
 	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
 #endif
 	
+	double time_in_seconds = (total_duration - init_duration) / 1000000.0;
+	
 	printf("Computation duration: %lfs; Performance: %lf GFlops\n",
-		   clock_duration / 1000000.0,
-		   0.001 * REPS * (DIM * DIM) / clock_duration);
+		   time_in_seconds,
+		   1E-9 * (((long)REPS * (long)DIM * (long)DIM) / time_in_seconds));
 }
 
