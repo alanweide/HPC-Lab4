@@ -1,4 +1,4 @@
-all: cuda serial
+all: clean cuda serial
 
 remake: clean all
 

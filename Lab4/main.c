@@ -10,8 +10,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+
+#ifdef CUDA
 #include <cuda_runtime.h>
 #include <cuda.h>
+#endif
 
 #define DIM 4097
 
@@ -22,16 +25,16 @@
 void initMatrix(double *F) {
 	for (int i = 0; i < DIM; i++) {
 		for (int j = 0; j < DIM; j++) {
-			F[DIM * i + j] = 1.0 + ((double)rand() / RAND_MAX);
+			F[DIM * i + j] = i + j / 2;//1.0;//+ ((double)rand() / RAND_MAX);
 		}
 	}
 }
 
 void printMatrix (double *F) {
 	for (int i = 0; i < DIM; i++) {
-		printf("[ ");
+		printf("[");
 		for (int j = 0; j < DIM; j++) {
-			printf(" %lf", F[DIM * i + j]);
+			printf(" %.1lf", F[DIM * i + j]);
 		}
 		printf(" ]\n");
 	}
@@ -48,7 +51,7 @@ void computeStuff(double *F) {
 	}
 }
 
-__global__ void cudaCompute(double* F) {
+__global__ void cuda_compute(double* F) {
 	int bid = blockIdx.x;
 	int tid = threadIdx.x;
 	
@@ -62,7 +65,7 @@ __global__ void cudaCompute(double* F) {
 int main(int argc, const char * argv[]) {
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(double);
-	double* F =(double*) malloc(memSize);
+	double* F = (double*) malloc(memSize);
 	
 	clock_t clock_start = clock();
 
@@ -82,7 +85,7 @@ int main(int argc, const char * argv[]) {
 	
 #ifdef CUDA
 	for (int i = 0; i < REPS; i++) {
-		cudaCompute<<<dimGrid, dimBlock>>>(d_F);
+		cuda_compute<<<dimGrid, dimBlock>>>(d_F);
 		cudaThreadSynchronize();
 	}
 #else
@@ -94,6 +97,8 @@ int main(int argc, const char * argv[]) {
 #ifdef CUDA
 	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
 #endif
+	
+//	printMatrix(F);
 	
 	double time_in_seconds = (total_duration - init_duration) / 1000000.0;
 	
