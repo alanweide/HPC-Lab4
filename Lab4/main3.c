@@ -24,7 +24,7 @@
 void initMatrix(int *F) {
 	for (int i = 0; i < DIM; i++) {
 		for (int j = 0; j < DIM; j++) {
-			F[DIM * i + j] = DIM*i + j;//(int)(1 + ((1000L * rand()) / RAND_MAX));
+			F[DIM * i + j] = (int)(1 + ((1000L * rand()) / RAND_MAX));
 		}
 	}
 }
@@ -57,7 +57,7 @@ __global__ void cuda_compute(int *F, int *startI, int *startJ, int spt) {
 	int tid = gridDim.x * blockIdx.x + threadIdx.x;
 	
 	for (int i = startI[tid]; i < DIM && !thrDone; i++) {
-		for (int j = startJ[tid]; j < i && !thrDone; j++) {
+		for (int j = (i == startI[tid] ? startJ[tid] : 0); j < i && !thrDone; j++) {
 			int tmp = F[DIM*j + i];
 			F[DIM*j + i] = F[DIM*i + j];
 			F[DIM*i + j] = tmp;
@@ -77,32 +77,31 @@ int main(int argc, char* argv[]) {
 	clock_t clock_start = clock();
 	
 	initMatrix(F);
-	printMatrix(F);
-	printf("\n");
+//	printMatrix(F);
+//	printf("\n");
 	
 	int spt = (DIM+1) * (DIM+1) / 2 / (NBLK * TPB);
-	printf("spt=%d\n", spt);
+//	printf("spt=%d\n", spt);
 	int *startI = (int*)malloc(thrArrSize);
 	int *startJ = (int*)malloc(thrArrSize);
 	for (int i = 0; i < NBLK * TPB; i++) {
 		startI[i] = 1 + (((int)(sqrt(1 + 8 * i * spt)) - 1) / 2);
 		startJ[i] = (i * spt) - ((startI[i] + 0) * (startI[i] - 1) / 2);
+//		printf("t[%d] = (%d, %d)\n", i, startI[i], startJ[i]);
 	}
 	
 #ifdef CUDA
 	int *d_F, *d_i, *d_j;
 	cudaMalloc((void**) &d_F, memSize);
 	cudaMemcpy(d_F, F, memSize, cudaMemcpyHostToDevice);
-	cudaMalloc((void**) &d_i, thrArrSize);
-	cudaMalloc((void**) &d_j, thrArrSize);
 	
 	dim3 dimGrid(NBLK);
 	dim3 dimBlock(TPB);
-	
+
+	cudaMalloc((void**) &d_i, thrArrSize);
+	cudaMalloc((void**) &d_j, thrArrSize);
 	cudaMemcpy(d_i, startI, thrArrSize, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_j, startJ, thrArrSize, cudaMemcpyHostToDevice);
-	
-	printf("%d\n", spt);
 #endif
 	
 	clock_t init_duration = clock() - clock_start;
@@ -120,8 +119,8 @@ int main(int argc, char* argv[]) {
 	cudaMemcpy(F, d_F, memSize, cudaMemcpyDeviceToHost);
 #endif
 	
-	printf("\n");
-	printMatrix(F);
+//	printf("\n");
+//	printMatrix(F);
 	
 	double time_in_seconds = (total_duration - init_duration) / 1000000.0;
 	
