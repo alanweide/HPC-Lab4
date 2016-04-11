@@ -69,9 +69,19 @@ __global__ void cuda_compute(int *F, int *startI, int *startJ, int spt) {
 #endif
 
 int main(int argc, char* argv[]) {
+	
+	int nblk, tpb;
+	if (argc == 3) {
+		nblk = atoi(argv[1]);
+		tpb = atoi(argv[2]);
+	} else {
+		nblk = NBLK;
+		tpb = TPB;
+	}
+	
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(int);
-	size_t thrArrSize = NBLK * TPB * sizeof(int);
+	size_t thrArrSize = nblk * tpb * sizeof(int);
 	int* F = (int*) malloc(memSize);
 	
 	clock_t clock_start = clock();
@@ -80,11 +90,11 @@ int main(int argc, char* argv[]) {
 //	printMatrix(F);
 //	printf("\n");
 	
-	int spt = (DIM+1) * (DIM+1) / 2 / (NBLK * TPB);
+	int spt = (DIM+1) * (DIM+1) / 2 / (nblk * tpb);
 //	printf("spt=%d\n", spt);
 	int *startI = (int*)malloc(thrArrSize);
 	int *startJ = (int*)malloc(thrArrSize);
-	for (int i = 0; i < NBLK * TPB; i++) {
+	for (int i = 0; i < nblk * tpb; i++) {
 		startI[i] = 1 + (((int)(sqrt(1 + 8 * i * spt)) - 1) / 2);
 		startJ[i] = (i * spt) - ((startI[i] + 0) * (startI[i] - 1) / 2);
 //		printf("t[%d] = (%d, %d)\n", i, startI[i], startJ[i]);
@@ -124,7 +134,7 @@ int main(int argc, char* argv[]) {
 	
 	double time_in_seconds = (total_duration - init_duration) / 1000000.0;
 	
-	printf("\nComputation duration: %lfs; Performance: %lf GFlops\n",
+	printf("\nComputation duration: %lfs; Performance: %lf GIops\n",
 		   time_in_seconds,
-		   1E-9 * ((long)DIM * (long)DIM) / time_in_seconds);
+		   1E-9 * (10 * (long)DIM * (long)DIM) / time_in_seconds);
 }
