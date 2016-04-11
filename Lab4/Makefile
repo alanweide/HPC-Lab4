@@ -15,5 +15,11 @@ cuda2-print:
 serial2:
 	nvcc -O3 main2.cu -o serial2
 
+cuda3:
+	nvcc -O3 -D CUDA main3.cu -o lab4p3
+
+serial3:
+	nvcc -O3 main3.cu -o serial3
+
 clean:
-	rm -f cuda serial
+	rm -f cuda1 serial1 cuda2 serial2 cuda2p
