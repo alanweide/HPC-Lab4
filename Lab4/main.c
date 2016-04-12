@@ -22,10 +22,12 @@
 #define REPS 100
 #endif
 
+int reps = REPS;
+
 void initMatrix(double *F) {
 	for (int i = 0; i < DIM; i++) {
 		for (int j = 0; j < DIM; j++) {
-			F[DIM * i + j] = i + j / 2;//1.0;//+ ((double)rand() / RAND_MAX);
+			F[DIM * i + j] = 1.0 + ((double)rand() / RAND_MAX);
 		}
 	}
 }
@@ -42,7 +44,7 @@ void printMatrix (double *F) {
 }
 
 void computeStuff(double *F) {
-	for (int k = 0; k < REPS; k++)  {
+	for (int k = 0; k < reps; k++)  {
 		for (int i = 1; i < DIM; i++) {
 			for (int j = 0; j < DIM - 1; j++) {
 				F[DIM * i + j] = F[DIM * (i-1) + (j+1)] + F[DIM * i + (j+1)];
@@ -63,6 +65,11 @@ __global__ void cuda_compute(double* F) {
 }
 
 int main(int argc, const char * argv[]) {
+	
+	if (argc == 2) {
+		reps = atoi(argv[1]);
+	}
+	
 	srand((uint32_t)time(NULL));
 	size_t memSize = DIM * DIM * sizeof(double);
 	double* F = (double*) malloc(memSize);
@@ -84,7 +91,7 @@ int main(int argc, const char * argv[]) {
 	clock_t init_duration = clock() - clock_start;
 	
 #ifdef CUDA
-	for (int i = 0; i < REPS; i++) {
+	for (int i = 0; i < reps; i++) {
 		cuda_compute<<<dimGrid, dimBlock>>>(d_F);
 		cudaThreadSynchronize();
 	}
