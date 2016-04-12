@@ -16,7 +16,7 @@
 #include <cuda_runtime.h>
 #endif
 
-#define DIM 2048
+#define DIM 4096
 #define NBLK 8
 #define TPB 512
 
