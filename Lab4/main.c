@@ -82,8 +82,8 @@ int main(int argc, const char * argv[]) {
 	double* d_F;
 	cudaMalloc((void**) &d_F, memSize);
 	cudaMemcpy(d_F, F, memSize, cudaMemcpyHostToDevice);
-	int nBlocks = 1;
-	int tpb = 1024;
+	int nBlocks = 16;
+	int tpb = 256;
 	dim3 dimGrid(nBlocks);
 	dim3 dimBlock(tpb);
 #endif
@@ -111,6 +111,6 @@ int main(int argc, const char * argv[]) {
 	
 	printf("Computation duration: %lfs; Performance: %lf GFlops\n",
 		   time_in_seconds,
-		   1E-9 * (((long)REPS * (long)DIM * (long)DIM) / time_in_seconds));
+		   1E-9 * (((long)reps * (long)DIM * (long)DIM) / time_in_seconds));
 }
 

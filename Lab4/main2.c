@@ -17,8 +17,8 @@
 #endif
 
 #define DIM 4096
-#define NBLK 8
-#define TPB 512
+#define NBLK 16
+#define TPB 256
 
 void init_matrices(double *A, double *C) {
 	for (int i = 0; i < DIM; i++) {
