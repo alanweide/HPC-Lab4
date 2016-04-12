@@ -101,9 +101,6 @@ int main(int argc, char* argv[]) {
 	
 	initMatrix(F);
 
-	printMatrix(F);
-	printf("\n");
-	
 	int spt = 1 + (DIM * DIM) / 2 / (nblk * tpb);
 	int *startI = (int*)malloc(thrArrSize);
 	int *startJ = (int*)malloc(thrArrSize);
@@ -156,8 +153,6 @@ int main(int argc, char* argv[]) {
 #ifdef CUDA
 	cudaMemcpy(computedF, d_F, memSize, cudaMemcpyDeviceToHost);
 #endif
-	
-	printMatrix(computedF);
 	
 	verifyTranspose(F, computedF);
 	
